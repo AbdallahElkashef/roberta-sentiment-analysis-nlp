@@ -1,9 +1,11 @@
 import re
-import pickle
 import streamlit as st
 import pandas as pd
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# ---------------------------- Hugging Face Model ----------------------------
+MODEL_ID = "YOUR_USERNAME/YOUR_MODEL_NAME"
 
 # ---------------------------- Page Setup ----------------------------
 st.set_page_config(
@@ -23,28 +25,15 @@ def clean_text(text: str) -> str:
 # ---------------------------- Load Model & Tokenizer ----------------------------
 @st.cache_resource
 def load_model():
-    with open("deploy_bundle/model_bundle_cpu.pkl", "rb") as f:
-        bundle = pickle.load(f)
-
-    metadata = bundle["metadata"]
-    state_dict = bundle["state_dict"]
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        metadata["model_base"],
-        num_labels=metadata["num_labels"]
-    )
-    model.load_state_dict(state_dict)
-    model.to("cpu")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+    model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID)
     model.eval()
 
-    tokenizer = AutoTokenizer.from_pretrained("deploy_bundle/tokenizer")
-
-    id2label = metadata.get("id2label", {0: "negative", 1: "neutral", 2: "positive"})
-
+    id2label = model.config.id2label
     return model, tokenizer, id2label
 
 model, tokenizer, ID2LABEL = load_model()
-st.success("✅ Model and tokenizer loaded successfully on CPU")
+st.success("✅ Model and tokenizer loaded from Hugging Face")
 
 # ---------------------------- Inference ----------------------------
 def predict(text: str):
@@ -52,7 +41,7 @@ def predict(text: str):
     enc = tokenizer(
         text,
         truncation=True,
-        padding="max_length",
+        padding=True,
         max_length=128,
         return_tensors="pt"
     )
@@ -112,4 +101,4 @@ if mode == "Batch CSV":
 
 # ---------------------------- Footer ----------------------------
 st.markdown("---")
-st.caption("🚀 Fine-tuned RoBERTa sentiment classifier deployed on CPU using Streamlit")
+st.caption("🚀 RoBERTa sentiment classifier deployed using Streamlit Cloud")
