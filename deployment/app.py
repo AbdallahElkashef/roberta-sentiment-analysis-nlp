@@ -5,7 +5,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # ---------------------------- Hugging Face Model ----------------------------
-MODEL_ID = "YOUR_USERNAME/YOUR_MODEL_NAME"
+MODEL_ID = "AbdallahElkashef/roberta-sentiment-product-reviews"
 
 # ---------------------------- Page Setup ----------------------------
 st.set_page_config(
@@ -29,8 +29,14 @@ def load_model():
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID)
     model.eval()
 
-    id2label = model.config.id2label
+    id2label = {
+        0: "negative",
+        1: "neutral",
+        2: "positive"
+    }
+
     return model, tokenizer, id2label
+
 
 model, tokenizer, ID2LABEL = load_model()
 st.success("✅ Model and tokenizer loaded from Hugging Face")
