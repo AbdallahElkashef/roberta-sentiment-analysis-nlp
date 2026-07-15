@@ -9,7 +9,6 @@ This project implements a **Transformer-based sentiment analysis system** for la
 A fine-tuned **RoBERTa** model is used to classify customer reviews into:
 
 
-
 * **Negative**
 * **Neutral**
 * **Positive**
